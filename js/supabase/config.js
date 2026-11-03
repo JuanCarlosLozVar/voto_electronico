@@ -12,5 +12,5 @@
 // Usado por: js/supabase/client.js (crea el cliente con estos valores).
 // =====================================================================
 
-export const SUPABASE_URL = "https://fxstbwitmwmzuytvgzej.supabase.co";
-export const SUPABASE_ANON_KEY = "sb_publishable_rQzVWG67hhp9hS6YXHsYSQ_f3eQC1IT";
+export const SUPABASE_URL = "https://qqzvlaajwkpcegceetdk.supabase.co";
+export const SUPABASE_ANON_KEY = "sb_publishable_NiKal16FWQX6yUjXD1kFtQ_S2zYMzm_";
