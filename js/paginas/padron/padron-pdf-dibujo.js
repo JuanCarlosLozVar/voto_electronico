@@ -48,11 +48,26 @@ function textoAjustado(doc, texto, x, y, anchoMax, tamano, tamanoMin = 5.5, opci
   doc.text(texto, x, y, opciones);
 }
 
-function etiquetaGrupo(e) {
-  return `${String(e.grado).toUpperCase()} "${String(e.seccion).toUpperCase()}"`;
+// Devuelve las formas de escribir los grados y secciones de una mesa,
+// de la más detallada a la más corta, para que siempre quepa en la franja:
+//   1) 1RO "A", 1RO "B", 2DO "A"
+//   2) 1RO "A, B", 2DO "A"
+//   3) VARIOS GRADOS Y SECCIONES
+function opcionesTextoGrupos(estudiantes) {
+  const porGrado = new Map();
+  estudiantes.forEach((e) => {
+    const g = String(e.grado).toUpperCase();
+    if (!porGrado.has(g)) porGrado.set(g, new Set());
+    porGrado.get(g).add(String(e.seccion).toUpperCase());
+  });
+  const grados = [...porGrado.keys()].sort((a, b) => a.localeCompare(b, "es", { numeric: true }));
+  const secciones = (g) => [...porGrado.get(g)].sort((a, b) => a.localeCompare(b, "es", { numeric: true }));
+  const completo = grados.flatMap((g) => secciones(g).map((s) => `${g} "${s}"`)).join(", ");
+  const compacto = grados.map((g) => `${g} "${secciones(g).join(", ")}"`).join(", ");
+  return [completo, compacto, "VARIOS GRADOS Y SECCIONES"];
 }
 
-function dibujarEncabezado(doc, ctx, mesa, totalElectores, textoGrupos, hoja, totalHojas) {
+function dibujarEncabezado(doc, ctx, mesa, totalElectores, opcionesGrupos, hoja, totalHojas) {
   const { colegio, eleccion, insignia, anio } = ctx;
 
   if (insignia) {
@@ -109,7 +124,14 @@ function dibujarEncabezado(doc, ctx, mesa, totalElectores, textoGrupos, hoja, to
   doc.setFontSize(9.5);
   const numeroMesa = String(mesa.numero).padStart(2, "0");
   doc.text(`MESA DE SUFRAGIO N° ${numeroMesa}`, MARGEN + 3, 46.5);
-  textoAjustado(doc, `GRADO Y SECCIÓN: ${textoGrupos}`, 79, 46.5, 95, 9.5, 6);
+  // Se usa la forma más detallada que quepa a 7 pt; si ninguna cabe,
+  // la última (genérica) siempre entra.
+  const ANCHO_GRUPOS = 95;
+  doc.setFontSize(7);
+  const textoGrupos =
+    opcionesGrupos.find((t) => doc.getTextWidth(`GRADO Y SECCIÓN: ${t}`) <= ANCHO_GRUPOS) ||
+    opcionesGrupos[opcionesGrupos.length - 1];
+  textoAjustado(doc, `GRADO Y SECCIÓN: ${textoGrupos}`, 79, 46.5, ANCHO_GRUPOS, 9.5, 6);
   doc.setFontSize(9.5);
   doc.text(`Hoja ${hoja} de ${totalHojas}`, MARGEN + ANCHO_CONTENIDO - 3, 46.5, { align: "right" });
 }
@@ -201,15 +223,13 @@ export function construirPadronPdf(jsPDF, { colegio, eleccion, insignia, grupos 
   grupos.forEach(({ mesa, estudiantes }) => {
     const total = estudiantes.length;
     const totalHojas = Math.max(1, Math.ceil(total / POR_HOJA));
-    const textoGrupos = [...new Set(estudiantes.map(etiquetaGrupo))]
-      .sort((a, b) => a.localeCompare(b, "es", { numeric: true }))
-      .join(", ");
+    const opcionesGrupos = opcionesTextoGrupos(estudiantes);
 
     for (let hoja = 1; hoja <= totalHojas; hoja++) {
       if (!primeraPagina) doc.addPage();
       primeraPagina = false;
 
-      dibujarEncabezado(doc, ctx, mesa, total, textoGrupos, hoja, totalHojas);
+      dibujarEncabezado(doc, ctx, mesa, total, opcionesGrupos, hoja, totalHojas);
 
       const desde = (hoja - 1) * POR_HOJA;
       const pagina = estudiantes.slice(desde, desde + POR_HOJA);
