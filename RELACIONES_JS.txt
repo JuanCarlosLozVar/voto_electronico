@@ -1,0 +1,329 @@
+====================================================================
+  MAPA DE RELACIONES ENTRE ARCHIVOS JS — Voto Electrónico v11
+====================================================================
+
+Cómo leer este documento
+-------------------------
+Cada página HTML ahora carga UN SOLO <script type="module"
+src="js/paginas/<pagina>/entry.js">. Ese entry.js es el punto de
+partida: importa (con "import") los demás archivos de su carpeta, que
+a su vez importan piezas compartidas de js/supabase/ y js/utils/.
+
+"A depende de B" significa que A tiene una línea "import ... from B"
+en la parte de arriba del archivo.
+
+Todos los archivos usan ES Modules (import/export). Las funciones que
+el HTML llama con onclick="..." (por ejemplo onclick="eliminarLista(5)")
+se exponen explícitamente con una línea window.nombreFuncion =
+nombreFuncion al final del archivo que las define — así el HTML no tuvo
+que tocarse casi nada.
+
+
+====================================================================
+1. ARCHIVOS COMPARTIDOS (los usa más de una página)
+====================================================================
+
+js/supabase/config.js
+  - Contenido: SUPABASE_URL y SUPABASE_ANON_KEY.
+  - Lo usa: js/supabase/client.js.
+
+js/supabase/client.js
+  - Depende de: config.js, y de window.supabase (librería @supabase/
+    supabase-js, cargada con <script> normal en el <head> de cada
+    página, ANTES del <script type="module">).
+  - Exporta: supabaseClient (la conexión).
+  - Lo usa: prácticamente todos los módulos de todas las páginas.
+
+js/supabase/auth.js
+  - Depende de: client.js.
+  - Exporta: obtenerPerfilActual, requireAdminSession,
+    requireResultsSession, cerrarSesion.
+  - cerrarSesion se expone en window (todas las páginas administrativas
+    tienen un botón "Cerrar sesión" con onclick="cerrarSesion()").
+  - Lo usa: el entry.js de CADA página protegida (todas menos
+    index.html y votar.html, que son públicas).
+
+js/supabase/navegacion.js
+  - Depende de: auth.js (obtenerPerfilActual).
+  - Exporta: ajustarNavegacionPorRol (oculta enlaces solo-admin y
+    cambia la etiqueta de rol en el menú para un directivo).
+  - Lo usa: dashboard/entry.js, resultados/entry.js.
+
+js/supabase/storage.js
+  - Depende de: client.js.
+  - Exporta: subirImagen (sube un archivo al bucket público "media").
+  - Lo usa: configuracion/insignia-form.js, listas/listas-crud.js,
+    listas/candidatos-crud.js.
+
+js/supabase/colegio.js
+  - Depende de: client.js.
+  - Exporta: cargarColegioPublico (pinta nombre/lema/insignia del
+    colegio; no requiere sesión).
+  - Lo usa: index/entry.js, votar/entry.js.
+
+js/utils/html.js
+  - Sin dependencias (función pura).
+  - Exporta: escapeHtml (evita XSS al insertar datos en innerHTML).
+  - Lo usa: casi todos los módulos que arman tablas/tarjetas con datos
+    de Supabase.
+
+
+====================================================================
+2. index.html  →  js/paginas/index/
+====================================================================
+entry.js       → importa login.js y cargarColegioPublico (supabase/colegio.js)
+login.js       → depende de supabase/client.js y supabase/auth.js
+                 (maneja el formulario de login + auto-redirección)
+
+
+====================================================================
+3. invitacion.html  →  js/paginas/invitacion/
+====================================================================
+entry.js       → importa estado.js, activar.js y registro.js;
+                 depende de supabase/client.js
+estado.js      → variables compartidas (token, elementos del DOM,
+                 invitacionEmail) — sin dependencias
+activar.js     → depende de supabase/client.js y estado.js
+registro.js    → depende de supabase/client.js, activar.js y estado.js
+
+Orden de carga: entry.js → estado.js → activar.js → registro.js
+(registro.js importa activar.js para poder llamarla tras el signUp).
+
+
+====================================================================
+4. configuracion.html  →  js/paginas/configuracion/
+====================================================================
+entry.js          → importa colegio-form.js e insignia-form.js;
+                     depende de supabase/auth.js
+preview.js        → sin dependencias de Supabase (solo maneja el <img>
+                     de vista previa)
+colegio-form.js   → depende de supabase/client.js y preview.js
+insignia-form.js  → depende de supabase/client.js, supabase/storage.js
+                     y preview.js
+
+
+====================================================================
+5. usuarios.html  →  js/paginas/usuarios/
+====================================================================
+entry.js         → importa directivos.js e invitaciones.js;
+                    depende de supabase/auth.js
+directivos.js    → depende de supabase/client.js y utils/html.js
+invitaciones.js  → depende de supabase/client.js y utils/html.js
+
+
+====================================================================
+6. dashboard.html  →  js/paginas/dashboard/
+====================================================================
+entry.js         → importa estadisticas.js, banner.js, codigo-qr.js;
+                    depende de supabase/auth.js y supabase/navegacion.js
+banner.js        → depende de supabase/client.js
+estadisticas.js  → depende de supabase/client.js y banner.js
+                    (actualizarBannerVotacion)
+codigo-qr.js     → sin dependencias de Supabase (usa window.QRCode,
+                    librería global)
+
+
+====================================================================
+7. jornada.html  →  js/paginas/jornada/
+====================================================================
+entry.js          → importa eleccion-data.js y acciones.js;
+                     depende de supabase/auth.js
+estado.js         → variables compartidas (eleccionActual,
+                     modoNuevaJornada) — sin dependencias
+eleccion-data.js  → depende de supabase/client.js y estado.js
+acciones.js       → depende de supabase/client.js, estado.js y
+                     eleccion-data.js (cargarEleccion)
+
+
+====================================================================
+8. listas.html  →  js/paginas/listas/
+====================================================================
+entry.js               → importa eleccion-actual.js, padron-busqueda.js,
+                          render-listas.js, previsualizacion.js,
+                          listas-crud.js, candidatos-crud.js;
+                          depende de supabase/auth.js
+estado.js               → variables compartidas (modales, caches,
+                          eleccionActualId) — sin dependencias
+eleccion-actual.js      → depende de supabase/client.js y estado.js
+padron-busqueda.js      → depende de supabase/client.js, utils/html.js
+                          y estado.js
+render-listas.js        → depende de supabase/client.js, utils/html.js
+                          y estado.js
+previsualizacion.js     → sin dependencias de Supabase (solo <img> de
+                          vista previa)
+listas-crud.js          → depende de supabase/client.js,
+                          supabase/storage.js, estado.js y
+                          render-listas.js (cargarListas)
+candidatos-crud.js      → depende de supabase/client.js,
+                          supabase/storage.js, estado.js y
+                          render-listas.js (cargarListas)
+
+
+====================================================================
+9. mesas.html  →  js/paginas/mesas/
+====================================================================
+entry.js         → importa render-mesas.js, mesas-crud.js,
+                    miembros-mesa.js; depende de supabase/auth.js
+estado.js        → variables compartidas (modales, mesasCache,
+                    estudiantesPorMesa, miembrosPorMesa) — sin deps
+render-mesas.js  → depende de supabase/client.js, utils/html.js y
+                    estado.js (el "escrutinio en vivo" de cada mesa)
+mesas-crud.js    → depende de supabase/client.js, estado.js y
+                    render-mesas.js (cargarMesas)
+miembros-mesa.js → depende de supabase/client.js, utils/html.js,
+                    estado.js y render-mesas.js (cargarMesas)
+
+
+====================================================================
+10. votar.html  →  js/paginas/votar/
+====================================================================
+entry.js             → importa eleccion-publica.js, flujo.js,
+                        paso-dni.js, paso-boleta.js, paso-confirmar.js,
+                        paso-voto.js; depende de supabase/colegio.js
+estado.js            → variables compartidas del flujo de votación
+                        (dni, estudiante, lista elegida, intervalos)
+plantillas.js        → depende de utils/html.js (funciones de
+                        presentación puras: mostrarPaso, avatarHtml,
+                        candidatoPrincipal, badgeAlumnoHtml)
+flujo.js             → depende de plantillas.js y estado.js
+                        (reiniciarFlujo, iniciarRedireccion — separado
+                        para que eleccion-publica.js y paso-voto.js NO
+                        tengan que importarse entre sí)
+eleccion-publica.js  → depende de supabase/client.js, flujo.js y
+                        estado.js
+paso-dni.js          → depende de supabase/client.js, utils/html.js,
+                        plantillas.js y estado.js
+paso-boleta.js       → depende de supabase/client.js, utils/html.js,
+                        plantillas.js y estado.js
+paso-confirmar.js    → depende de utils/html.js, plantillas.js y
+                        estado.js
+paso-voto.js         → depende de supabase/client.js, plantillas.js,
+                        flujo.js y estado.js
+
+
+====================================================================
+11. resultados.html  →  js/paginas/resultados/
+====================================================================
+entry.js               → importa selector-eleccion.js, tiempo-real.js,
+                          pdf-actas.js, pdf-finales.js; depende de
+                          supabase/auth.js y supabase/navegacion.js
+estado.js               → variables compartidas (caches de resultados,
+                          gráfico, elección seleccionada, canal
+                          realtime) — sin dependencias
+resumen.js              → depende de supabase/client.js y estado.js
+grafico-general.js      → depende de supabase/client.js, utils/html.js,
+                          estado.js y resumen.js (cargarResumenResultados)
+tabla-por-mesa.js       → depende de supabase/client.js, utils/html.js
+                          y estado.js
+datos-acta.js           → depende de supabase/client.js y estado.js
+pdf-actas.js             → depende de datos-acta.js y estado.js
+pdf-finales.js           → depende de datos-acta.js, resumen.js y
+                          estado.js
+tiempo-real.js           → depende de supabase/client.js, estado.js,
+                          grafico-general.js y tabla-por-mesa.js
+selector-eleccion.js     → depende de supabase/client.js, utils/html.js,
+                          estado.js y tiempo-real.js
+
+
+====================================================================
+12. padron.html  →  js/paginas/padron/   (la página más grande)
+====================================================================
+entry.js              → importa mesas-select.js, estudiantes-data.js,
+                         filtros.js, paginacion.js, seleccion.js,
+                         grupos.js, estudiante-crud.js,
+                         excel-exportar.js, excel-importar.js, orden.js,
+                         pdf-padron-mesas.js;
+                         depende de supabase/auth.js
+estado.js             → TODAS las variables compartidas de esta página
+                         (modales, caches, selección, paginación,
+                         orden, importación) — sin dependencias
+mesas-select.js       → depende de supabase/client.js, utils/html.js
+                         y estado.js
+orden.js              → depende de estado.js y paginacion.js
+                         (mostrarPagina) — import circular seguro,
+                         ver comentario dentro del archivo
+paginacion.js         → depende de estado.js, orden.js (ordenarLista)
+                         y tabla-render.js (pintarEstudiantes)
+tabla-render.js       → depende de utils/html.js, estado.js y
+                         seleccion.js (actualizarEstadoSelectAll /
+                         actualizarBarraSeleccion)
+filtros.js            → depende de estado.js y paginacion.js
+                         (mostrarPagina)
+estudiantes-data.js   → depende de supabase/client.js, utils/html.js,
+                         estado.js, filtros.js y paginacion.js
+seleccion.js          → depende de supabase/client.js, estado.js,
+                         estudiantes-data.js (cargarEstudiantes), y
+                         de forma dinámica (import() perezoso) de
+                         tabla-render.js, para evitar un ciclo estático
+                         con ese archivo
+grupos.js             → depende de supabase/client.js, utils/html.js,
+                         estado.js, mesas-select.js y
+                         estudiantes-data.js
+estudiante-crud.js    → depende de supabase/client.js, estado.js y
+                         estudiantes-data.js
+excel-exportar.js     → depende de filtros.js y orden.js
+pdf-padron-mesas.js   → depende de supabase/client.js, estado.js,
+                         resultados/datos-acta.js (insignia) y
+                         padron-pdf-dibujo.js. Requiere jsPDF (script
+                         global en padron.html)
+padron-pdf-dibujo.js  → sin dependencias; dibuja el PDF "Lista de
+                         electores" por mesa
+excel-importar.js     → depende de supabase/client.js, utils/html.js,
+                         estado.js, mesas-select.js y
+                         estudiantes-data.js
+
+
+====================================================================
+13. Funciones expuestas en window (por qué existen)
+====================================================================
+El HTML original usa atributos onclick="..." tanto en botones fijos
+del HTML como en botones generados dinámicamente por JavaScript
+(dentro de un innerHTML). Los módulos ES no exponen sus funciones como
+variables globales automáticamente, así que cada función llamada de
+esa forma tiene una línea extra al final de su archivo:
+
+    window.nombreFuncion = nombreFuncion;
+
+Esto es SOLO "cableado" (conectar el HTML con el módulo) — no cambia
+en nada la lógica interna de la función. Lista completa:
+
+  cerrarSesion            → js/supabase/auth.js
+  cambiarEstadoDirectivo  → js/paginas/usuarios/directivos.js
+  revocarInvitacion       → js/paginas/usuarios/invitaciones.js
+  nuevaLista               → js/paginas/listas/listas-crud.js
+  editarLista               → js/paginas/listas/listas-crud.js
+  eliminarLista             → js/paginas/listas/listas-crud.js
+  abrirModalCandidato        → js/paginas/listas/candidatos-crud.js
+  eliminarCandidato          → js/paginas/listas/candidatos-crud.js
+  nuevaMesa                   → js/paginas/mesas/mesas-crud.js
+  editarMesa                   → js/paginas/mesas/mesas-crud.js
+  eliminarMesa                  → js/paginas/mesas/mesas-crud.js
+  abrirModalMiembros              → js/paginas/mesas/miembros-mesa.js
+  seleccionarLista                 → js/paginas/votar/paso-boleta.js
+  exportarExcel                     → js/paginas/padron/excel-exportar.js
+  generarPadronPorMesa              → js/paginas/padron/pdf-padron-mesas.js
+  nuevoEstudiante                    → js/paginas/padron/estudiante-crud.js
+  editarEstudiante                    → js/paginas/padron/estudiante-crud.js
+  eliminarEstudiante                   → js/paginas/padron/estudiante-crud.js
+  limpiarFiltros                        → js/paginas/padron/filtros.js
+  asignarMesaSeleccionados               → js/paginas/padron/seleccion.js
+  eliminarSeleccionados                   → js/paginas/padron/seleccion.js
+  cancelarSeleccion                        → js/paginas/padron/seleccion.js
+  ordenarPor                                → js/paginas/padron/orden.js
+  asignarGrupo                               → js/paginas/padron/grupos.js
+  descargarPlantilla                          → js/paginas/padron/excel-importar.js
+  confirmarImportacion                         → js/paginas/padron/excel-importar.js
+
+
+====================================================================
+14. Cómo leer el proyecto por primera vez (sugerencia de recorrido)
+====================================================================
+1. js/supabase/config.js y client.js — cómo se conecta todo a Supabase.
+2. js/supabase/auth.js — cómo se protege cada página (login, roles).
+3. Elige UNA página completa y sigue su entry.js paso a paso, abriendo
+   cada archivo que importa en el orden en que aparece.
+4. Los archivos "estado.js" de cada página son un buen resumen de
+   "qué información necesita recordar esta pantalla mientras el
+   usuario la usa".
+5. Los comentarios de cabecera de cada archivo (el bloque con "===")
+   siempre dicen: qué hace el archivo, de qué depende, y quién lo usa.

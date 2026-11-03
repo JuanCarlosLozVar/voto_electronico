@@ -1,0 +1,356 @@
+:root {
+  --azul-noche:  #16233f;
+  --azul-medio:  #1f335c;
+  --rojo-civico: #c8102e;
+  --oro:         #c79a3f;
+  --crema:       #f6f4ee;
+  --gris-texto:  #3c4250;
+  --borde:       #e3ddc9;
+}
+
+body {
+  background: var(--crema);
+  color: var(--gris-texto);
+  font-family: "Source Sans 3", system-ui, -apple-system, Segoe UI, sans-serif;
+}
+
+h1, h2, h3, h4, .brand-font {
+  font-family: "Fraunces", Georgia, "Times New Roman", serif;
+  color: var(--azul-noche);
+}
+
+/* ---------- Barra superior civica ---------- */
+.topbar {
+  background: var(--azul-noche);
+  border-bottom: 3px solid var(--oro);
+  position: sticky;
+  top: 0;
+  z-index: 1030; /* por encima del contenido y los modales de Bootstrap quedan más arriba (1055) */
+}
+.topbar .navbar-brand,
+.topbar .nav-link {
+  color: #f2efe4 !important;
+}
+.topbar .nav-link.active {
+  color: var(--oro) !important;
+  font-weight: 600;
+}
+.topbar .navbar-brand small {
+  display: block;
+  font-size: .68rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #9aa6c2;
+}
+
+/* ---------- Tarjetas ---------- */
+.card {
+  border: 1px solid var(--borde);
+  border-radius: .5rem;
+}
+.card-stat {
+  border-left: 4px solid var(--rojo-civico);
+}
+.card-stat .stat-num {
+  font-family: "Fraunces", serif;
+  font-size: 2.1rem;
+  color: var(--azul-noche);
+  line-height: 1;
+}
+.card-stat .stat-label {
+  font-size: .8rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: #7a8091;
+}
+
+/* ---------- Botones ---------- */
+.btn-civico {
+  background: var(--rojo-civico);
+  border-color: var(--rojo-civico);
+  color: #fff;
+}
+.btn-civico:hover {
+  background: #a80d26;
+  border-color: #a80d26;
+  color: #fff;
+}
+.btn-azul {
+  background: var(--azul-medio);
+  border-color: var(--azul-medio);
+  color: #fff;
+}
+.btn-azul:hover {
+  background: var(--azul-noche);
+  border-color: var(--azul-noche);
+  color: #fff;
+}
+
+/* ---------- Login / voto: pantalla centrada ---------- */
+.pantalla-centrada {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background: linear-gradient(180deg, var(--azul-noche) 0%, var(--azul-medio) 100%);
+}
+.tarjeta-acceso {
+  background: #fff;
+  border-radius: .6rem;
+  max-width: 460px;
+  width: 100%;
+  padding: 2.2rem;
+  box-shadow: 0 20px 45px rgba(0,0,0,.25);
+}
+.sello {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--rojo-civico);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Fraunces", serif;
+  font-size: 1.4rem;
+  margin: 0 auto 1rem;
+}
+.insignia-login {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  margin: 0 auto 1rem;
+  display: block;
+}
+.insignia-voto {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: #fff;
+  padding: 3px;
+}
+
+/* ---------- Boleta de votación ---------- */
+.boleta-lista {
+  border: 2px solid var(--borde);
+  border-radius: .5rem;
+  padding: 1.1rem 1.2rem;
+  cursor: pointer;
+  transition: border-color .15s, box-shadow .15s;
+}
+.boleta-lista:hover {
+  border-color: var(--oro);
+  box-shadow: 0 4px 14px rgba(0,0,0,.08);
+}
+.boleta-lista.seleccionada {
+  border-color: var(--rojo-civico);
+  background: #fff6f6;
+}
+.boleta-numero {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--azul-noche);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ---------- Estados ---------- */
+.badge-pendiente { background: #e9ecef; color: #495057; }
+.badge-abierta   { background: #d7f2df; color: #1a7431; }
+.badge-cerrada   { background: #fbdada; color: #a0142c; }
+
+.table > :not(caption) > * > * {
+  vertical-align: middle;
+}
+
+footer.pie-civico {
+  color: #9aa6c2;
+  font-size: .78rem;
+  text-align: center;
+  padding: 1.2rem 0;
+}
+
+/* ---------- Paginación ---------- */
+.pagination .page-link {
+  color: var(--rojo-civico);
+}
+.pagination .page-item.active .page-link {
+  background: var(--rojo-civico);
+  border-color: var(--rojo-civico);
+  color: #fff;
+}
+.pagination .page-item.disabled .page-link {
+  color: #b7bdc9;
+}
+
+/* ---------- Encabezados ordenables ---------- */
+.th-ordenable {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.th-ordenable:hover {
+  color: var(--rojo-civico);
+}
+.orden-indicador {
+  font-size: .75em;
+}
+
+/* ---------- SweetAlert2 Compacto ---------- */
+.swal2-popup.swal-compacto {
+  width: 320px !important;
+  padding: 1.25rem 1rem !important;
+  border-radius: 0.6rem !important;
+  border: 1px solid var(--borde) !important;
+}
+
+.swal2-icon {
+  transform: scale(0.65) !important;
+  margin: 0.25rem auto -0.5rem auto !important;
+}
+
+.swal-titulo-compacto {
+  font-family: "Fraunces", Georgia, serif !important;
+  font-size: 1.15rem !important;
+  color: var(--azul-noche) !important;
+  margin-top: 0.5rem !important;
+  padding: 0 !important;
+}
+
+.swal-texto-compacto {
+  font-size: 0.85rem !important;
+  color: var(--gris-texto) !important;
+  margin-top: 0.4rem !important;
+  padding: 0 0.5rem !important;
+}
+
+.swal2-actions {
+  margin-top: 1rem !important;
+}
+
+/* ---------- Votación estudiantil (flujo de 5 pasos) ---------- */
+.pantalla-voto {
+  min-height: 100vh;
+  background: linear-gradient(150deg, var(--azul-noche) 0%, var(--azul-medio) 55%, #2c1f45 100%);
+  padding-bottom: 3rem;
+}
+.voto-topbar {
+  background: rgba(22, 35, 63, .55);
+  backdrop-filter: blur(6px);
+  padding: .9rem 0;
+  border-bottom: 1px solid rgba(255,255,255,.12);
+}
+.voto-topbar .brand {
+  color: #f2efe4;
+  font-family: "Fraunces", serif;
+  font-size: 1.05rem;
+}
+.voto-topbar .brand small {
+  display: block;
+  font-size: .68rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: #b9c2dc;
+}
+
+.voto-pasos { max-width: 640px; margin: 0 auto; padding: 2rem 1rem 0; }
+.voto-pasos.ancho { max-width: 960px; }
+
+.voto-card {
+  background: #fff;
+  border-radius: .75rem;
+  padding: 2rem;
+  box-shadow: 0 25px 50px rgba(0,0,0,.28);
+  animation: votoFade .25s ease;
+}
+@keyframes votoFade {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.voto-contador { display: flex; gap: .6rem; justify-content: center; margin: 1rem 0 .5rem; }
+.voto-contador .caja {
+  background: #fff; border: 1px solid var(--borde); border-radius: .5rem;
+  padding: .5rem 1rem; text-align: center; min-width: 64px;
+}
+.voto-contador .caja .num {
+  font-family: "Fraunces", serif; font-size: 1.3rem; color: var(--azul-noche); line-height: 1;
+}
+.voto-contador .caja .lbl {
+  font-size: .62rem; text-transform: uppercase; letter-spacing: .05em; color: #8a90a0;
+}
+
+.voto-badge-alumno {
+  background: #fff; border-radius: .6rem; padding: .85rem 1.1rem;
+  box-shadow: 0 10px 25px rgba(0,0,0,.15); font-size: .82rem;
+}
+.voto-badge-alumno strong {
+  display: block; color: var(--azul-noche); font-family: "Fraunces", serif; font-size: .95rem;
+}
+
+.avatar-candidato {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: var(--azul-medio); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-family: "Fraunces", serif; overflow: hidden; flex-shrink: 0;
+}
+.avatar-candidato img { width: 100%; height: 100%; object-fit: cover; }
+.avatar-candidato.grande { width: 68px; height: 68px; font-size: 1.3rem; }
+
+.lista-card {
+  border: 2px solid var(--borde); border-radius: .65rem; padding: 1.1rem;
+  cursor: pointer; background: #fff; transition: all .15s; height: 100%;
+}
+.lista-card:hover { border-color: var(--oro); box-shadow: 0 8px 20px rgba(0,0,0,.08); }
+.lista-card.seleccionada {
+  border-color: var(--rojo-civico); background: #fff6f6;
+  box-shadow: 0 8px 20px rgba(200,16,46,.15);
+}
+.lista-card .lista-numero-tag {
+  display: inline-block; background: var(--azul-noche); color: #fff; font-size: .72rem;
+  padding: .15rem .55rem; border-radius: 999px; margin-bottom: .5rem;
+}
+.lista-logo {
+  width: 40px; height: 40px; object-fit: contain; border-radius: .4rem;
+  background: #f4f5f8; border: 1px solid var(--borde); flex-shrink: 0;
+}
+.lista-logo-sm { width: 28px; height: 28px; }
+.lista-card.lista-blanco {
+  border-style: dashed; display: flex; flex-direction: column; justify-content: center;
+  text-align: center; background: #fbfbfd;
+}
+.lista-card.lista-blanco .lista-numero-tag {
+  background: #6c757d;
+}
+.lista-card.lista-blanco.seleccionada {
+  border-style: solid;
+}
+
+.cargo-item {
+  display: flex; align-items: center; gap: .7rem; padding: .55rem 0;
+  border-bottom: 1px solid var(--borde);
+}
+.cargo-item:last-child { border-bottom: none; }
+.cargo-numero {
+  width: 28px; height: 28px; border-radius: 50%; background: var(--oro); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: .78rem;
+  font-weight: 700; flex-shrink: 0;
+}
+
+.btn-exito { background: #1a9c5a; border-color: #1a9c5a; color: #fff; }
+.btn-exito:hover { background: #158049; border-color: #158049; color: #fff; }
+.btn-exito:disabled { background: #9fcfb6; border-color: #9fcfb6; }
+
+.sello-exito { background: #1a9c5a; }
+
+/* ---------- Escrutinio por mesa (tarjetas en Mesas) ---------- */
+.escrutinio-mesa { max-height: 260px; overflow-y: auto; }
+.escrutinio-fila { border-bottom: 1px solid var(--borde); }
+.escrutinio-fila:last-child { border-bottom: none; }

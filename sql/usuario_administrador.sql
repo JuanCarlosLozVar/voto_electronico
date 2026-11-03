@@ -1,0 +1,1 @@
+select fn_configurar_admin_por_email('d42670179w@perueduca.edu.pe');

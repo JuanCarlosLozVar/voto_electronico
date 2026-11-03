@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Votación · Municipio Escolar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+<link href="css/style.css" rel="stylesheet">
+</head>
+<body class="pantalla-voto">
+
+<nav class="voto-topbar">
+  <div class="container d-flex align-items-center gap-2">
+    <img id="colegioInsignia" src="" alt="" class="insignia-voto d-none">
+    <span class="brand">Municipio Escolar<small id="tituloEleccion">Votación electrónica</small></span>
+  </div>
+</nav>
+
+<!-- PASO 1: Consulta por DNI -->
+<div id="pasoDni" class="voto-pasos">
+  <div class="voto-card text-center">
+    <div class="sello mx-auto" id="colegioSello">🗳</div>
+    <h2 class="h4 mb-1" id="nombreEleccionPaso1">Elecciones del Municipio Escolar</h2>
+    <p class="text-muted mb-3">Ingresa tu número de DNI para verificar que estás habilitado en el padrón.</p>
+
+    <div id="cajaContador" class="d-none">
+      <p class="small text-muted mb-1">Tiempo restante para votar</p>
+      <div class="voto-contador">
+        <div class="caja"><div class="num" id="ctHoras">00</div><div class="lbl">Horas</div></div>
+        <div class="caja"><div class="num" id="ctMin">00</div><div class="lbl">Minutos</div></div>
+        <div class="caja"><div class="num" id="ctSeg">00</div><div class="lbl">Segundos</div></div>
+      </div>
+    </div>
+
+    <div id="avisoCerrada" class="alert alert-secondary text-start d-none mb-3">
+      La votación no está abierta en este momento. Consulta con tu comité electoral.
+    </div>
+
+    <form id="formDni" class="mt-3">
+      <label class="form-label text-start d-block small">Número de DNI</label>
+      <input type="text" id="dni" class="form-control form-control-lg text-center mb-3" placeholder="Ej: 70123456" required maxlength="15">
+      <button type="submit" class="btn btn-exito btn-lg w-100" id="btnAccederVotar">Acceder para votar</button>
+    </form>
+    <div id="mensajeDni" class="mt-3 text-start"></div>
+    <p class="small text-muted mt-3 mb-0">Si tienes problemas para acceder, contacta a tu comité electoral.</p>
+  </div>
+</div>
+
+<!-- PASO 2: Datos del estudiante -->
+<div id="pasoDatos" class="voto-pasos d-none">
+  <div class="voto-card">
+    <div class="d-flex align-items-center gap-2 mb-1">
+      <div class="avatar-candidato">👤</div>
+      <div>
+        <h2 class="h5 mb-0">Verificación de datos</h2>
+        <p class="text-muted small mb-0">Confirma que tu información personal sea correcta</p>
+      </div>
+    </div>
+    <div class="row g-2 mt-2">
+      <div class="col-6">
+        <div class="border rounded p-2">
+          <div class="small text-muted">Nombre completo</div>
+          <strong id="datoNombreCompleto">–</strong>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="border rounded p-2">
+          <div class="small text-muted">Grado</div>
+          <strong id="datoGrado">–</strong>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="border rounded p-2">
+          <div class="small text-muted">Sección</div>
+          <strong id="datoSeccion">–</strong>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="border rounded p-2">
+          <div class="small text-muted">Mesa asignada</div>
+          <strong id="datoMesa">–</strong>
+        </div>
+      </div>
+    </div>
+    <div class="d-flex gap-2 mt-3">
+      <button class="btn btn-exito flex-fill" id="btnContinuarVotar">Continuar para votar</button>
+      <button class="btn btn-outline-danger" id="btnNoSoyYo">Estos no son mis datos</button>
+    </div>
+  </div>
+</div>
+
+<!-- PASO 3: Boleta -->
+<div id="pasoBoleta" class="voto-pasos ancho d-none">
+  <div class="row g-3 align-items-stretch mb-3">
+    <div class="col-md-8">
+      <div class="voto-card h-100 py-3">
+        <h2 class="h5 mb-1" id="nombreEleccionPaso3">Elecciones del Municipio Escolar</h2>
+        <p class="text-muted small mb-0">Selecciona tu lista preferida</p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="voto-badge-alumno h-100" id="badgeAlumnoBoleta"></div>
+    </div>
+  </div>
+
+  <p class="text-center text-white-50 small mb-3">Haz clic en la opción de tu elección ↓</p>
+
+  <div id="listaOpciones" class="row g-3 mb-3"></div>
+
+  <div class="text-center">
+    <button class="btn btn-civico btn-lg px-5" id="btnIrAConfirmar" disabled>Votar</button>
+  </div>
+</div>
+
+<!-- PASO 4: Confirmar voto -->
+<div id="pasoConfirmar" class="voto-pasos ancho d-none">
+  <div class="d-flex justify-content-end mb-2">
+    <div class="voto-badge-alumno" id="badgeAlumnoConfirmar" style="max-width: 260px;"></div>
+  </div>
+  <div class="voto-card mx-auto" style="max-width: 480px;">
+    <h2 class="h4 text-center mb-1">Confirmar Voto</h2>
+    <p class="text-center text-muted small mb-3">¿Está seguro de su elección?</p>
+
+    <div id="resumenListaConfirmar"></div>
+
+    <div id="cargosConfirmar" class="mt-2 mb-3"></div>
+
+    <div class="d-flex gap-2">
+      <button class="btn btn-exito flex-fill" id="btnConfirmarVoto">Confirmar voto</button>
+      <button class="btn btn-outline-danger" id="btnCambiarVoto">Cambiar voto</button>
+    </div>
+  </div>
+</div>
+
+<!-- PASO 5: Éxito -->
+<div id="pasoExito" class="voto-pasos d-none">
+  <div class="voto-card text-center">
+    <div class="sello sello-exito mx-auto">✓</div>
+    <h2 class="h4">¡Gracias por votar!</h2>
+    <p class="text-muted small mb-3">Tu participación ha sido registrada</p>
+
+    <ul class="list-unstyled text-start small mx-auto" style="max-width: 360px;">
+      <li class="mb-2">✅ Tu voto ha sido procesado correctamente</li>
+      <li class="mb-2">🤝 Contribuyes a fortalecer la democracia estudiantil</li>
+      <li class="fst-italic text-muted">“Tu voz es importante para construir una mejor comunidad estudiantil”</li>
+    </ul>
+
+    <button class="btn btn-civico px-4" id="btnSalirSistema">Salir del sistema</button>
+    <p class="small text-muted mt-2 mb-0" id="textoRedireccion"></p>
+  </div>
+</div>
+
+<footer class="pie-civico">Prototipo interno del colegio · No es un sistema oficial de la ONPE</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script type="module" src="js/paginas/votar/entry.js"></script>
+</body>
+</html>

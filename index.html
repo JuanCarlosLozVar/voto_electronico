@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Acceso al sistema · Municipio Escolar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Source+Sans+3:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link href="css/style.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="pantalla-centrada">
+      <div class="tarjeta-acceso">
+        <div class="text-center mb-3">
+          <div class="sello" id="colegioSello">ME</div>
+          <img id="colegioInsignia" src="" alt="Insignia del colegio" class="insignia-login d-none">
+          <h1 class="h4 mb-0" id="colegioNombre">Municipio Escolar</h1>
+          <p class="text-muted small mb-0" id="colegioLema">Panel electoral · Administrador / Directivo</p>
+        </div>
+
+        <form id="formLogin">
+          <div class="mb-3">
+            <label class="form-label">Correo</label>
+            <input
+              type="email"
+              id="email"
+              class="form-control"
+              placeholder="admin@colegio.edu.pe"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Contraseña</label>
+            <input
+              type="password"
+              id="password"
+              class="form-control"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-civico w-100 py-2">
+            Ingresar
+          </button>
+        </form>
+
+        <p class="text-center small text-muted mt-3 mb-0">
+          ¿Eres estudiante? <a href="votar.html">Ir a la votación</a>
+        </p>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module" src="js/paginas/index/entry.js"></script>
+  </body>
+</html>

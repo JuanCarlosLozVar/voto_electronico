@@ -1,0 +1,82 @@
+AUDITORÍA FINAL - VOTO ELECTRÓNICO v10
+
+Estado: preparado para pasar de pruebas locales a pruebas reales controladas.
+
+CAMBIOS INTEGRADOS
+
+1. Cierre automático de elección
+- Supabase Cron ejecuta fn_cerrar_elecciones_vencidas() cada minuto.
+- fn_consultar_estudiante() valida hora de inicio y hora final en servidor.
+- fn_emitir_voto() valida hora de inicio y hora final en servidor.
+- fn_obtener_estado_eleccion_publico() calcula los timestamps con America/Lima.
+- El contador de votar.html usa fin_at del servidor y al llegar a cero fuerza una nueva consulta.
+- El cierre manual con fn_cerrar_eleccion() se conserva.
+- La base impide más de una elección abierta al mismo tiempo.
+
+2. Roles
+- perfiles: admin/directivo.
+- directivo tiene subrol director/subdirector.
+- el admin existente de Supabase Auth se enlaza con fn_configurar_admin_por_email().
+- páginas administrativas requieren rol admin.
+- resultados.html admite admin y directivo.
+- directivo no administra jornada, padrón, mesas, listas ni configuración.
+
+3. Invitaciones directivas
+- usuarios.html solo para admin.
+- admin crea invitaciones con token aleatorio.
+- solo se almacena SHA-256 del token.
+- invitación tiene expiración, estado y revocación.
+- invitacion.html crea/activa la cuenta del directivo.
+- la activación exige que el correo de Auth coincida con el correo invitado.
+- admin puede activar/desactivar directivos.
+
+4. Resultados en tiempo real
+- votos genera eventos mínimos en eventos_resultado.
+- eventos_resultado se publica por Supabase Realtime.
+- resultados.html escucha INSERT de eventos y refresca los resultados.
+- existe un respaldo de actualización cada 15 segundos.
+- directivos consultan resultados mediante RPC agregadas; no reciben CRUD de votos.
+
+5. Integridad histórica
+- votos ya no elimina mesas/listas/elecciones/votantes mediante CASCADE.
+- listas.numero es único por eleccion_id.
+- candidatos ahora tienen eleccion_id y pueden repetirse en elecciones diferentes.
+- candidatos deben pertenecer a la misma elección que su lista.
+- listas no se pueden modificar cuando la elección está abierta o ya tiene votos.
+- mesas con votos no se pueden modificar/eliminar.
+- elecciones cerradas con votos no se pueden editar desde CRUD directo.
+
+6. Doble voto
+- unique(eleccion_id, estudiante_id) en votantes.
+- bloqueo FOR UPDATE de estudiante durante la emisión.
+- se conserva estudiantes.ha_votado solo por compatibilidad; la decisión real es votantes.
+
+7. Seguridad
+- se eliminó el permiso general "authenticated = admin".
+- RLS distingue admin/directivo.
+- resultados directivos pasan por RPC autorizadas.
+- service_role no se usa en frontend.
+- DNI exige formato de 8 dígitos.
+
+PRUEBAS REALIZADAS EN LOS ARCHIVOS
+
+- Node --check de supabaseClient.js, js/index.js y js/dashboard.js: OK.
+- Node --check de todos los scripts inline de los HTML: OK.
+- No quedaron políticas SQL con auth.role()='authenticated' como permiso administrativo general.
+
+PRUEBAS QUE DEBEN HACERSE EN SUPABASE / NAVEGADOR
+
+1. Ejecutar migracion_multi_anio.sql en la base existente.
+2. Ejecutar select fn_configurar_admin_por_email('CORREO_ADMIN');
+3. Confirmar que cron tenga el job cerrar-elecciones-vencidas.
+4. Confirmar que eventos_resultado esté en supabase_realtime.
+5. Crear invitación Director.
+6. Crear invitación Subdirector.
+7. Verificar que ambos entren solo a resultados.
+8. Registrar voto y comprobar actualización en vivo.
+9. Probar voto antes de hora_inicio.
+10. Probar voto al terminar hora_fin.
+11. Probar cierre automático sin tener jornada.html abierta.
+12. Probar doble voto simultáneo.
+13. Probar que lista/mesa con votos no se puedan eliminar.
+14. Subir a InfinityFree y repetir las pruebas desde HTTPS.

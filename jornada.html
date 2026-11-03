@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jornada electoral · Municipio Escolar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+<link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg topbar">
+  <div class="container">
+    <a class="navbar-brand" href="dashboard.html">Municipio Escolar<small>Panel de administración</small></a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="nav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="padron.html">Padrón</a></li>
+        <li class="nav-item"><a class="nav-link" href="mesas.html">Mesas</a></li>
+        <li class="nav-item"><a class="nav-link" href="listas.html">Listas y candidatos</a></li>
+        <li class="nav-item"><a class="nav-link active" href="jornada.html">Jornada electoral</a></li>
+        <li class="nav-item"><a class="nav-link" href="resultados.html">Resultados</a></li>
+        <li class="nav-item"><a class="nav-link" href="configuracion.html">Configuración</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" onclick="cerrarSesion()">Cerrar sesión</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container py-4">
+  <h2 class="mb-1">Jornada electoral</h2>
+  <p class="text-muted mb-4">Configura los datos de la elección y controla la apertura y cierre de la votación.</p>
+
+  <div class="row g-3">
+    <div class="col-lg-7">
+      <div class="card p-3">
+        <h3 class="h5">Datos de la elección</h3>
+        <form id="formEleccion">
+          <input type="hidden" id="eleccionId">
+          <div class="mb-2">
+            <label class="form-label">Nombre de la elección</label>
+            <input type="text" id="nombre" class="form-control" required>
+          </div>
+          <div class="row">
+            <div class="col-4 mb-2">
+              <label class="form-label">Fecha</label>
+              <input type="date" id="fecha" class="form-control" required>
+            </div>
+            <div class="col-4 mb-2">
+              <label class="form-label">Hora inicio</label>
+              <input type="time" id="horaInicio" class="form-control" required>
+            </div>
+            <div class="col-4 mb-2">
+              <label class="form-label">Hora fin</label>
+              <input type="time" id="horaFin" class="form-control" required>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-azul mt-2">Guardar datos</button>
+          <p class="small text-muted mt-2 mb-0 d-none" id="avisoEdicionBloqueada">
+            🔒 No se pueden editar estos datos mientras la votación está <strong>abierta</strong>.
+            Cierra la votación primero si necesitas corregir algo.
+          </p>
+        </form>
+      </div>
+
+      <div class="card p-3 mt-3 d-none" id="cardEleccionGuardada">
+        <h3 class="h6 mb-2">✅ Elección guardada</h3>
+        <p class="mb-1"><strong id="resumenNombre">–</strong></p>
+        <p class="text-muted small mb-2" id="resumenFechaHorario">–</p>
+        <span class="badge rounded-pill px-3 py-2 align-self-start mb-3" id="resumenBadge">–</span>
+        <div>
+          <button type="button" class="btn btn-civico btn-sm" id="btnActivarDesdeResumen">Activar votación ahora</button>
+          <button type="button" class="btn btn-outline-primary btn-sm d-none" id="btnNuevaJornada">🗳️ Nueva jornada electoral (año nuevo)</button>
+          <p class="small text-muted mt-2 mb-0" id="resumenAyuda">Estos datos ya están guardados. Pulsa el botón para abrir la votación.</p>
+        </div>
+      </div>
+
+      <div class="card p-3 mt-3 d-none" id="cardNuevaJornada">
+        <h3 class="h6 mb-2">🗳️ Nueva jornada electoral</h3>
+        <p class="small text-muted mb-2">
+          La elección anterior (<strong id="nombreEleccionAnterior">–</strong>) se queda guardada como historial:
+          sus resultados y actas siguen disponibles en <a href="resultados.html">Resultados</a>. Completa arriba
+          los datos de la nueva elección y guárdalos para crearla como una jornada totalmente independiente.
+        </p>
+        <p class="small text-muted mb-2">
+          Recuerda también revisar el <a href="padron.html">padrón</a> (alumnos que egresaron / ingresaron) y
+          crear las <a href="listas.html">listas y candidatos</a> de este año.
+        </p>
+        <button type="button" class="btn btn-outline-secondary btn-sm align-self-start" id="btnCancelarNuevaJornada">Cancelar</button>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="card p-3 h-100">
+        <h3 class="h5">Estado actual</h3>
+        <span class="badge rounded-pill px-3 py-2 mb-3 align-self-start" id="badgeEstado">–</span>
+
+        <div class="d-grid gap-2">
+          <button class="btn btn-civico" id="btnAbrir">Abrir votación</button>
+          <button class="btn btn-outline-danger" id="btnCerrar">Cerrar votación</button>
+        </div>
+        <p class="small text-muted mt-3 mb-0">
+          Mientras la votación esté <strong>abierta</strong>, los estudiantes pueden ingresar su DNI
+          en <code>votar.html</code> y emitir su voto. Al <strong>cerrar</strong>, se bloquea el ingreso
+          de nuevos votos y se puede pasar al escrutinio.
+        </p>
+        <div class="alert alert-info small mt-3 mb-0">⏱️ El cierre es automático al llegar la hora final, aunque ningún administrador esté conectado. El botón de cierre manual sigue disponible.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="pie-civico">Prototipo interno del colegio · No es un sistema oficial de la ONPE</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script type="module" src="js/paginas/jornada/entry.js"></script>
+
+</body>
+</html>
