@@ -1,0 +1,1 @@
+cluster votos using votos_pkey;
