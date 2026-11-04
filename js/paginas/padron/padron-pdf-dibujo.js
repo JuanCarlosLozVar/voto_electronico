@@ -72,28 +72,30 @@ function dibujarEncabezado(doc, ctx, mesa, totalElectores, textoFranja, hoja, to
   doc.setTextColor(0);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(12.5);
-  doc.text(`ELECCIONES MUNICIPALES ESCOLARES ${anio}`, ANCHO_PAGINA / 2, 17, { align: "center" });
+  doc.text(`ELECCIONES MUNICIPALES ESCOLARES ${anio}`, ANCHO_PAGINA / 2, 16.2, { align: "center" });
 
+  // Nombre de la I.E. - distrito/lugar, y debajo solo el código modular.
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.5);
-  const nombreIe = [
-    [colegio.nombre, colegio.ie_codigo].filter(Boolean).join(" "),
-    colegio.distrito,
-  ]
+  const nombreIe = [colegio.nombre, colegio.distrito]
     .filter(Boolean)
     .join(" - ")
     .toUpperCase();
-  doc.text(nombreIe || "INSTITUCIÓN EDUCATIVA", ANCHO_PAGINA / 2, 22.5, { align: "center" });
+  doc.text(nombreIe || "INSTITUCIÓN EDUCATIVA", ANCHO_PAGINA / 2, 21.2, { align: "center" });
+  if (colegio.ie_codigo && String(colegio.ie_codigo).trim()) {
+    doc.setFontSize(8);
+    doc.text(String(colegio.ie_codigo).trim(), ANCHO_PAGINA / 2, 25.2, { align: "center" });
+  }
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
-  doc.text("LISTA DE ELECTORES", ANCHO_PAGINA / 2, 30.5, { align: "center" });
+  doc.text("LISTA DE ELECTORES", ANCHO_PAGINA / 2, 32.6, { align: "center" });
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.5);
   const fechaLarga = formatearFechaLarga(eleccion.fecha);
   if (fechaLarga) {
-    doc.text(`Fecha de votación: ${fechaLarga}`, ANCHO_PAGINA / 2, 36.5, { align: "center" });
+    doc.text(`Fecha de votación: ${fechaLarga}`, ANCHO_PAGINA / 2, 38, { align: "center" });
   }
 
   // Recuadro "TOTAL ELECTORES HÁBILES"
@@ -184,9 +186,11 @@ function dibujarFirmas(doc) {
 
 function dibujarPie(doc, ctx) {
   const { colegio, anio } = ctx;
-  const codigo = colegio.ie_codigo || "";
-  const prefijo = /^\s*i\.?\s?e\.?/i.test(codigo) ? "" : "I.E.";
-  const ie = [prefijo, codigo, colegio.distrito].filter(Boolean).join(" ");
+  // Pie: "I.E. <nombre del colegio>". No se repite "I.E." si el nombre ya
+  // empieza así (por ejemplo "I.E. N° 0773").
+  const nombre = (colegio.nombre || "").trim();
+  const yaTienePrefijo = /^\s*(i\.?\s?e\.?|instituci[oó]n educativa)/i.test(nombre);
+  const ie = [yaTienePrefijo ? "" : "I.E.", nombre].filter(Boolean).join(" ");
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
   doc.setTextColor(130);
