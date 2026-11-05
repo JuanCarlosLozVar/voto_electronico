@@ -190,7 +190,7 @@ function dibujarPie(doc, ctx) {
   // empieza así (por ejemplo "I.E. N° 0773").
   const nombre = (colegio.nombre || "").trim();
   const yaTienePrefijo = /^\s*(i\.?\s?e\.?|instituci[oó]n educativa)/i.test(nombre);
-  const ie = [yaTienePrefijo ? "" : "I.E.", nombre, "I.E.", colegio.distrito].filter(Boolean).join(" ");
+  const ie = [yaTienePrefijo ? "" : "I.E.", nombre, " -- ", colegio.distrito].filter(Boolean).join(" ");
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
   doc.setTextColor(130);
