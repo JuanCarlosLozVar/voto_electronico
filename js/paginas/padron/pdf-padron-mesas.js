@@ -22,49 +22,9 @@
 
 import { supabaseClient } from "../../supabase/client.js";
 import { estudiantesCache, mesasCache } from "./estado.js";
+import { agruparPorMesa, elegirMesas } from "./mesas-datos.js";
 import { cargarInsigniaComoDataURL } from "../resultados/datos-acta.js";
 import { construirPadronPdf } from "./padron-pdf-dibujo.js";
-
-function ordenarPorApellidos(a, b) {
-  return (
-    a.apellidos.localeCompare(b.apellidos, "es") ||
-    a.nombres.localeCompare(b.nombres, "es")
-  );
-}
-
-// Agrupa el padrón por mesa. Devuelve solo las mesas que tienen alumnos.
-function agruparPorMesa() {
-  return mesasCache
-    .map((mesa) => ({
-      mesa,
-      estudiantes: estudiantesCache
-        .filter((e) => e.mesa_id === mesa.id)
-        .sort(ordenarPorApellidos),
-    }))
-    .filter((g) => g.estudiantes.length > 0);
-}
-
-async function elegirMesas(grupos) {
-  const opciones = { todas: `Todas las mesas (${grupos.length})` };
-  grupos.forEach((g) => {
-    const num = String(g.mesa.numero).padStart(2, "0");
-    opciones[g.mesa.id] = `Mesa ${num} — ${g.estudiantes.length} electores`;
-  });
-
-  const { isConfirmed, value } = await Swal.fire({
-    title: "Padrón de votantes por mesa",
-    text: "¿De qué mesas quieres generar la lista de electores?",
-    input: "select",
-    inputOptions: opciones,
-    inputValue: "todas",
-    showCancelButton: true,
-    confirmButtonText: "Generar PDF",
-    cancelButtonText: "Cancelar",
-  });
-  if (!isConfirmed) return null;
-  if (value === "todas") return grupos;
-  return grupos.filter((g) => String(g.mesa.id) === String(value));
-}
 
 export async function generarPadronPorMesa() {
   if (!window.jspdf) {
@@ -86,7 +46,7 @@ export async function generarPadronPorMesa() {
     return;
   }
 
-  const gruposElegidos = await elegirMesas(gruposTodos);
+  const gruposElegidos = await elegirMesas(gruposTodos, "Padrón de votantes por mesa", "Generar PDF");
   if (!gruposElegidos || !gruposElegidos.length) return;
 
   const btn = document.getElementById("btnPadronPorMesa");

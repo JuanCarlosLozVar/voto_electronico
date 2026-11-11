@@ -38,7 +38,7 @@ export function formatearFechaLarga(fechaIso) {
 }
 
 // Escribe el texto reduciendo el tamaño de letra hasta que quepa.
-function textoAjustado(doc, texto, x, y, anchoMax, tamano, tamanoMin = 5.5, opciones) {
+export function textoAjustado(doc, texto, x, y, anchoMax, tamano, tamanoMin = 5.5, opciones) {
   let t = tamano;
   doc.setFontSize(t);
   while (t > tamanoMin && doc.getTextWidth(texto) > anchoMax) {
@@ -51,7 +51,7 @@ function textoAjustado(doc, texto, x, y, anchoMax, tamano, tamanoMin = 5.5, opci
 // Texto de grado y sección de la franja del encabezado:
 //   - mesa con un solo grado y sección  -> GRADO Y SECCIÓN: 1RO "A"
 //   - mesa que mezcla grados o secciones -> MIXTA
-function textoFranjaGrupos(estudiantes) {
+export function textoFranjaGrupos(estudiantes) {
   const grupos = new Set(
     estudiantes.map((e) => `${String(e.grado).toUpperCase()} "${String(e.seccion).toUpperCase()}"`),
   );

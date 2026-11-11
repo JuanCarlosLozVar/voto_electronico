@@ -18,6 +18,7 @@ import "./grupos.js";           // conecta el modal de grupos y expone asignarGr
 import "./estudiante-crud.js";  // conecta el formulario y expone nuevoEstudiante/editarEstudiante/eliminarEstudiante
 import "./excel-exportar.js";   // expone exportarExcel
 import "./pdf-padron-mesas.js";  // expone generarPadronPorMesa (PDF de lista de electores por mesa)
+import "./pdf-relacion-electores.js"; // expone generarRelacionElectores (relación para pegar afuera del aula)
 import "./excel-importar.js";   // conecta la importación y expone descargarPlantilla/confirmarImportacion
 
 (async () => {
