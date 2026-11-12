@@ -16,7 +16,9 @@ import { escapeHtml } from "../../utils/html.js";
 import {
   eleccionSeleccionadaId, setResultadosGeneralesCache,
   graficoVotosChart, setGraficoVotosChart,
+  graficoCircularChart, setGraficoCircularChart,
 } from "./estado.js";
+import { configBarras, configCircular } from "./graficos-config.js";
 import { cargarResumenResultados } from "./resumen.js";
 
 export async function cargarResultadoGeneral() {
@@ -86,38 +88,20 @@ export async function cargarResultadoGeneral() {
   `;
 
   const ctx = document.getElementById("graficoVotos");
+  const ctxCircular = document.getElementById("graficoCircular");
   if (typeof Chart === "undefined") {
-    ctx.replaceWith(
+    const aviso = () =>
       Object.assign(document.createElement("p"), {
         className: "text-muted text-center py-4 mb-0",
         textContent:
           "No se pudo cargar la librería del gráfico (revisa tu conexión a internet y recarga la página).",
-      }),
-    );
+      });
+    ctx.replaceWith(aviso());
+    ctxCircular.replaceWith(aviso());
     return;
   }
   if (graficoVotosChart) graficoVotosChart.destroy();
-  setGraficoVotosChart(
-    new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels: data.map((l) => `Lista ${l.numero} — ${l.nombre}`),
-        datasets: [
-          {
-            label: "Votos",
-            data: data.map((l) => l.total_votos),
-            backgroundColor: data.map((l, i) =>
-              i === 0 ? "#c8102e" : "#1f335c",
-            ),
-            borderRadius: 4,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        plugins: { legend: { display: false } },
-        scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
-      },
-    }),
-  );
+  if (graficoCircularChart) graficoCircularChart.destroy();
+  setGraficoVotosChart(new Chart(ctx, configBarras(data, totalBlanco)));
+  setGraficoCircularChart(new Chart(ctxCircular, configCircular(data, totalBlanco)));
 }
