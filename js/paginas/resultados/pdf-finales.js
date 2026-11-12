@@ -1,8 +1,9 @@
 // =====================================================================
 // PDF 2: RESULTADOS FINALES — resultados.html
 // =====================================================================
-// Genera un PDF con el gráfico de barras (dibujado con Chart.js sobre
-// un <canvas> oculto y convertido a imagen), el ganador general, la
+// Genera un PDF con el gráfico de barras y el circular (dibujados con
+// Chart.js sobre <canvas> ocultos y convertidos a imagen; su aspecto
+// viene de graficos-config.js), el ganador general, la
 // tabla de votos por lista y el ganador de cada mesa.
 //
 // Depende de: obtenerDatosActa, cargarInsigniaComoDataURL (datos-acta.js),
@@ -15,6 +16,7 @@
 import { obtenerDatosActa, cargarInsigniaComoDataURL } from "./datos-acta.js";
 import { cargarVotosBlancoTotal } from "./resumen.js";
 import { resultadosGeneralesCache, resultadosPorMesaCache } from "./estado.js";
+import { configBarras, configCircular } from "./graficos-config.js";
 
 async function exportarResultadosFinalesPdf() {
   const btn = document.getElementById("btnExportarFinal");
@@ -92,39 +94,39 @@ async function exportarResultadosFinalesPdf() {
     doc.setTextColor(0, 0, 0);
     y += 24;
 
-    // Gráfico de barras (dibujado con Chart.js sobre un canvas oculto)
-    const canvas = document.createElement("canvas");
-    canvas.width = 800;
-    canvas.height = 420;
-    const tmpChart = new Chart(canvas, {
-      type: "bar",
-      data: {
-        labels: resultadosGeneralesCache.map((l) => `Lista ${l.numero}`),
-        datasets: [
-          {
-            data: resultadosGeneralesCache.map((l) => l.total_votos),
-            backgroundColor: resultadosGeneralesCache.map((l, i) =>
-              i === 0 ? "#c8102e" : "#1f335c",
-            ),
-            borderRadius: 6,
-          },
-        ],
-      },
-      options: {
-        responsive: false,
-        animation: false,
-        plugins: { legend: { display: false } },
-        scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
-      },
-    });
-    await new Promise((r) => setTimeout(r, 200));
-    const imgData = canvas.toDataURL("image/png");
-    tmpChart.destroy();
+    // Gráficos: barras + circular, lado a lado. Se dibujan con Chart.js en
+    // canvas ocultos al doble de tamaño (escala 2) para que queden nítidos
+    // al reducirlos en la hoja.
+    async function graficoComoImagen(config, ancho, alto) {
+      const canvas = document.createElement("canvas");
+      canvas.width = ancho;
+      canvas.height = alto;
+      const chart = new Chart(canvas, config);
+      await new Promise((r) => setTimeout(r, 150));
+      const img = canvas.toDataURL("image/png");
+      chart.destroy();
+      return img;
+    }
 
-    const imgW = pageW - 30,
-      imgH = imgW * (420 / 800);
-    doc.addImage(imgData, "PNG", 15, y, imgW, imgH);
-    y += imgH + 8;
+    const opcionesPdf = { escala: 2, animar: false };
+    const anchoBarrasMm = 104,
+      anchoCircMm = 72,
+      altoMm = 62,
+      huecoMm = 4;
+    const pxPorMm = 10; // 10 px de canvas por mm de hoja
+    const imgBarras = await graficoComoImagen(
+      configBarras(resultadosGeneralesCache, totalBlanco, { ...opcionesPdf, nombreCompleto: false }),
+      anchoBarrasMm * pxPorMm,
+      altoMm * pxPorMm,
+    );
+    const imgCircular = await graficoComoImagen(
+      configCircular(resultadosGeneralesCache, totalBlanco, opcionesPdf),
+      anchoCircMm * pxPorMm,
+      altoMm * pxPorMm,
+    );
+    doc.addImage(imgBarras, "PNG", 15, y, anchoBarrasMm, altoMm);
+    doc.addImage(imgCircular, "PNG", 15 + anchoBarrasMm + huecoMm, y, anchoCircMm, altoMm);
+    y += altoMm + 8;
 
     doc.autoTable({
       startY: y,
