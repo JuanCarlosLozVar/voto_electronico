@@ -70,9 +70,23 @@
     </div>
   </div>
 
-  <div class="card p-3 mb-4">
-    <h3 class="h5">Gráfico de votos por lista</h3>
-    <canvas id="graficoVotos" height="90"></canvas>
+  <div class="row g-3 mb-4">
+    <div class="col-lg-7">
+      <div class="card p-3 h-100">
+        <h3 class="h5">Votos por lista</h3>
+        <div style="position:relative; height:280px;">
+          <canvas id="graficoVotos"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card p-3 h-100">
+        <h3 class="h5">Distribución de votos</h3>
+        <div style="position:relative; height:280px;">
+          <canvas id="graficoCircular"></canvas>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="card p-3">
