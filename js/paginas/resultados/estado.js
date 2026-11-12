@@ -22,6 +22,10 @@ export function setResultadosPorMesaCache(v) { resultadosPorMesaCache = v; }
 export let graficoVotosChart = null;
 export function setGraficoVotosChart(v) { graficoVotosChart = v; }
 
+// Instancia de Chart.js del gráfico circular (junto al de barras).
+export let graficoCircularChart = null;
+export function setGraficoCircularChart(v) { graficoCircularChart = v; }
+
 export let eleccionesCache = [];
 export function setEleccionesCache(v) { eleccionesCache = v; }
 
